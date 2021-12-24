@@ -30,7 +30,7 @@
 - register_client(bot_id)
 - start_game(bot_id)
 - play_move(bot_id,player_id,updated_PGN)
-- current_board_state(bot_id)
+- current_board_history(bot_id)
 - end_game(bot_id)
 
 
