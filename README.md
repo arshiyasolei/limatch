@@ -27,7 +27,7 @@
 
 - Each client will play for both sides
 
-# API endpionts
+# API endpoints
 
 - For now, we can only have one running game at a time
 
