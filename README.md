@@ -25,11 +25,11 @@
 
 - For now, we can only have one running game at a time
 
-register_client(bot_id)
-start_game(bot_id)
-play_move(bot_id,player_id,updated_PGN)
-current_board_state(bot_id)
-end_game(bot_id)
+- register_client(bot_id)
+- start_game(bot_id)
+- play_move(bot_id,player_id,updated_PGN)
+- current_board_state(bot_id)
+- end_game(bot_id)
 
 
 
