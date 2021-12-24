@@ -1,3 +1,7 @@
+# Development RULE TO FOLLOW
+
+- Always write tests either before coding or after coding. 
+
 # limatch
 
 - A chess game that can be played by ANYONE having access to the game. We can have multiple simul games going at the same time. 
