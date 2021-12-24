@@ -4,6 +4,8 @@
 
   - For example, one random player makes and we record/alternate the move
 
+- Eventual Dream: have two different clients play with each other
+
 # Rules
 
 - Normal chess rules (Except no resigning)
