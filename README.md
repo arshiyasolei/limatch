@@ -1,7 +1,3 @@
-# Development RULE TO FOLLOW
-
-- Always write tests either before coding or after coding. 
-
 # limatch
 
 - A chess game that can be played by ANYONE having access to the game. We can have multiple simul games going at the same time. 
@@ -37,7 +33,9 @@
 - current_board_history(bot_id)
 - end_game(bot_id)
 
+# Contribution guidelines
 
+- Always write tests either before coding or after coding. 
 
 
 
