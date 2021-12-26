@@ -6,6 +6,14 @@
 
 - Eventual Dream: have two different clients play with each other
 
+# To install & run
+
+```
+go install
+go build
+./limatch
+```
+
 # Rules
 
 - Normal chess rules (Except no resigning)
