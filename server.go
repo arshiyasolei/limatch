@@ -35,7 +35,7 @@ func startGame(bot_id int, db DBType) error {
 		return fmt.Errorf("bot id doesn't exist")
 	}
 	// check if a another game is running
-	if game := (*db)[bot_id]; game != nil && game.lastPlayedMovePlayerId != nil {
+	if game := (*db)[bot_id]; game != nil {
 		return fmt.Errorf("another game is running already")
 	}
 	(*db)[bot_id] = &Game{nil, ""}
@@ -51,6 +51,13 @@ func playMove(bot_id int, player_id int, move string, db DBType) error {
 	if game := (*db)[bot_id]; game == nil {
 		return fmt.Errorf("no game running")
 	}
+
+	// check if we are not making the a new move with the same player
+	// that played the previous move
+	if game := (*db)[bot_id]; game.lastPlayedMovePlayerId != nil && *game.lastPlayedMovePlayerId == player_id {
+		return fmt.Errorf("consecutive moves detected")
+	}
+
 	// instantiate a board and load current state
 	pgn, err := chess.PGN(strings.NewReader((*db)[bot_id].gameState))
 	if err != nil {

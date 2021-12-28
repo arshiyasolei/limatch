@@ -24,10 +24,15 @@ func TestStartGame(t *testing.T) {
 	if !reflect.DeepEqual(test_db, want) {
 		t.Errorf("Got: %v Want: %v ", test_db, want)
 	}
+
+	// game should not start because a game is already running
+	err := startGame(12345, &test_db)
+	if err == nil {
+		t.Error("Expected game to not start")
+	}
 }
 
 func TestPlayMove(t *testing.T) {
-
 	testPGN := ``
 	testPGNReader := strings.NewReader(testPGN)
 	pgn, err := chess.PGN(testPGNReader)
@@ -45,6 +50,11 @@ func TestPlayMove(t *testing.T) {
 	}
 	if test_db[12345].gameState != want {
 		t.Errorf("want: %v got: %v", want, test_db[12345].gameState)
+	}
+
+	err = playMove(12345, 1, "e5", &test_db)
+	if err == nil {
+		t.Errorf("Wanted error for invalid player id but got no errors")
 	}
 }
 
