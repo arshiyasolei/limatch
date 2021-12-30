@@ -9,24 +9,24 @@ import (
 )
 
 func TestRegisterClient(t *testing.T) {
-	test_db := map[int]*Game{}
-	registerClient(12345, &test_db)
+	testDB := map[int]*Game{}
+	registerClient(12345, &testDB)
 	want := map[int]*Game{12345: nil}
-	if !reflect.DeepEqual(test_db, want) {
-		t.Errorf("Got: %v Want: %v ", test_db, want)
+	if !reflect.DeepEqual(testDB, want) {
+		t.Errorf("Got: %v Want: %v ", testDB, want)
 	}
 }
 
 func TestStartGame(t *testing.T) {
-	test_db := map[int]*Game{12345: nil}
-	startGame(12345, &test_db)
+	testDB := map[int]*Game{12345: nil}
+	startGame(12345, &testDB)
 	want := map[int]*Game{12345: &Game{}}
-	if !reflect.DeepEqual(test_db, want) {
-		t.Errorf("Got: %v Want: %v ", test_db, want)
+	if !reflect.DeepEqual(testDB, want) {
+		t.Errorf("Got: %v Want: %v ", testDB, want)
 	}
 
 	// game should not start because a game is already running
-	err := startGame(12345, &test_db)
+	err := startGame(12345, &testDB)
 	if err == nil {
 		t.Error("Expected game to not start")
 	}
@@ -41,18 +41,18 @@ func TestPlayMove(t *testing.T) {
 	}
 	game := chess.NewGame(pgn)
 	game.MoveStr("e4")
-	test_db := map[int]*Game{12345: &Game{new(int), ""}}
+	testDB := map[int]*Game{12345: &Game{new(int), ""}}
 	want := game.String()
 
-	err = playMove(12345, 1, "e4", &test_db)
+	err = playMove(12345, 1, "e4", &testDB)
 	if err != nil {
 		panic(err)
 	}
-	if test_db[12345].gameState != want {
-		t.Errorf("want: %v got: %v", want, test_db[12345].gameState)
+	if testDB[12345].gameState != want {
+		t.Errorf("want: %v got: %v", want, testDB[12345].gameState)
 	}
 
-	err = playMove(12345, 1, "e5", &test_db)
+	err = playMove(12345, 1, "e5", &testDB)
 	if err == nil {
 		t.Errorf("Wanted error for invalid player id but got no errors")
 	}
@@ -60,18 +60,18 @@ func TestPlayMove(t *testing.T) {
 
 func TestCurrentBoardHistory(t *testing.T) {
 	currentPGN := `totally valid history`
-	test_db := map[int]*Game{12345: &Game{new(int), currentPGN}}
-	want, _ := currentBoardHistory(12345, &test_db)
-	if test_db[12345].gameState != want {
-		t.Errorf("want: %v got: %v", want, test_db[12345].gameState)
+	testDB := map[int]*Game{12345: &Game{new(int), currentPGN}}
+	want, _ := currentBoardHistory(12345, &testDB)
+	if testDB[12345].gameState != want {
+		t.Errorf("want: %v got: %v", want, testDB[12345].gameState)
 	}
 }
 
 func TestEndGame(t *testing.T) {
-	test_db := map[int]*Game{12345: &Game{new(int), ""}}
-	endGame(12345, &test_db)
+	testDB := map[int]*Game{12345: &Game{new(int), ""}}
+	endGame(12345, &testDB)
 	want := map[int]*Game{12345: nil}
-	if !reflect.DeepEqual(test_db, want) {
-		t.Errorf("Got: %v Want: %v ", test_db, want)
+	if !reflect.DeepEqual(testDB, want) {
+		t.Errorf("Got: %v Want: %v ", testDB, want)
 	}
 }

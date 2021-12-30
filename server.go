@@ -10,8 +10,8 @@ import (
 )
 
 type Game struct {
-	lastPlayedMovePlayerId *int   // optional
-	gameState              string // PGN or something
+	lastPlayedMoveID *int   // optional
+	gameState        string // PGN or something
 }
 
 type DBType *map[int]*Game
@@ -19,47 +19,47 @@ type DBType *map[int]*Game
 /*
 In memory 'database'
 */
-func registerClient(bot_id int, db DBType) error {
-	if _, ok := (*db)[bot_id]; ok {
-		// contains bot_id already
-		return fmt.Errorf("contains bot_id already")
+func registerClient(botID int, db DBType) error {
+	if _, ok := (*db)[botID]; ok {
+		// contains botID already
+		return fmt.Errorf("contains botID already")
 	} else {
-		(*db)[bot_id] = nil
+		(*db)[botID] = nil
 		return nil
 	}
 }
 
-func startGame(bot_id int, db DBType) error {
-	if _, ok := (*db)[bot_id]; !ok {
-		// doesn't contain bot_id
+func startGame(botID int, db DBType) error {
+	if _, ok := (*db)[botID]; !ok {
+		// doesn't contain botID
 		return fmt.Errorf("bot id doesn't exist")
 	}
 	// check if a another game is running
-	if game := (*db)[bot_id]; game != nil {
+	if game := (*db)[botID]; game != nil {
 		return fmt.Errorf("another game is running already")
 	}
-	(*db)[bot_id] = &Game{nil, ""}
+	(*db)[botID] = &Game{nil, ""}
 	return nil
 }
 
-func playMove(bot_id int, player_id int, move string, db DBType) error {
-	if _, ok := (*db)[bot_id]; !ok {
-		// doesn't contain bot_id
+func playMove(botID int, playerID int, move string, db DBType) error {
+	if _, ok := (*db)[botID]; !ok {
+		// doesn't contain botID
 		return fmt.Errorf("bot id doesn't exist")
 	}
 	// check if a game is running
-	if game := (*db)[bot_id]; game == nil {
+	if game := (*db)[botID]; game == nil {
 		return fmt.Errorf("no game running")
 	}
 
 	// check if we are not making the a new move with the same player
 	// that played the previous move
-	if game := (*db)[bot_id]; game.lastPlayedMovePlayerId != nil && *game.lastPlayedMovePlayerId == player_id {
+	if game := (*db)[botID]; game.lastPlayedMoveID != nil && *game.lastPlayedMoveID == playerID {
 		return fmt.Errorf("consecutive moves detected")
 	}
 
 	// instantiate a board and load current state
-	pgn, err := chess.PGN(strings.NewReader((*db)[bot_id].gameState))
+	pgn, err := chess.PGN(strings.NewReader((*db)[botID].gameState))
 	if err != nil {
 		return err
 	}
@@ -72,38 +72,38 @@ func playMove(bot_id int, player_id int, move string, db DBType) error {
 	}
 
 	// update the board & player
-	(*db)[bot_id].gameState = game.String()
+	(*db)[botID].gameState = game.String()
 	// very interesting https://stackoverflow.com/questions/46987513/handling-dangling-pointers-in-go
-	(*db)[bot_id].lastPlayedMovePlayerId = &player_id
+	(*db)[botID].lastPlayedMoveID = &playerID
 	return nil
 }
 
 /*
 assumes the potential returned board is valid
 */
-func currentBoardHistory(bot_id int, db DBType) (string, error) {
-	if _, ok := (*db)[bot_id]; !ok {
-		// doesn't contain bot_id
+func currentBoardHistory(botID int, db DBType) (string, error) {
+	if _, ok := (*db)[botID]; !ok {
+		// doesn't contain botID
 		return "", fmt.Errorf("bot id doesn't exist")
 	}
 	// check if a game is running
-	if game := (*db)[bot_id]; game == nil {
+	if game := (*db)[botID]; game == nil {
 		return "", fmt.Errorf("no game running")
 	} else {
 		return game.gameState, nil
 	}
 }
 
-func endGame(bot_id int, db DBType) error {
-	if _, ok := (*db)[bot_id]; !ok {
-		// doesn't contain bot_id
+func endGame(botID int, db DBType) error {
+	if _, ok := (*db)[botID]; !ok {
+		// doesn't contain botID
 		return fmt.Errorf("bot id doesn't exist")
 	}
 	// check if a game is running
-	if (*db)[bot_id] == nil {
+	if (*db)[botID] == nil {
 		return fmt.Errorf("no game running")
 	}
-	(*db)[bot_id] = nil
+	(*db)[botID] = nil
 	return nil
 }
 
@@ -119,21 +119,21 @@ func main() {
 	})
 
 	server.GET("/register_client", func(c *gin.Context) {
-		bot_id := c.Query("bot_id")
-		res, err := strconv.ParseInt(bot_id, 10, 32)
+		botID := c.Query("botID")
+		res, err := strconv.ParseInt(botID, 10, 32)
 		if err == nil {
 			err = registerClient(int(res), &db)
 			if err != nil {
 				c.String(400, "%v", err)
 			}
 		} else {
-			c.String(400, "invalid bot id: %v got: %v", err, bot_id)
+			c.String(400, "invalid bot id: %v got: %v", err, botID)
 		}
 	})
 
 	server.GET("/start_game", func(c *gin.Context) {
-		bot_id := c.Query("bot_id")
-		res, err := strconv.ParseInt(bot_id, 10, 32)
+		botID := c.Query("botID")
+		res, err := strconv.ParseInt(botID, 10, 32)
 		if err == nil {
 			err = startGame(int(res), &db)
 			if err != nil {
@@ -146,27 +146,27 @@ func main() {
 
 	server.GET("/play_move", func(c *gin.Context) {
 		// trying a different error handling approach
-		bot_id := c.Query("bot_id")
-		player_id := c.Query("player_id")
+		botID := c.Query("botID")
+		playerID := c.Query("playerID")
 		move_string := c.Query("move")
 		var move_err error = nil
-		bot_id_int, bot_id_err := strconv.ParseInt(bot_id, 10, 32)
-		player_id_int, player_id_err := strconv.ParseInt(player_id, 10, 32)
+		botID_int, botID_err := strconv.ParseInt(botID, 10, 32)
+		playerID_int, playerID_err := strconv.ParseInt(playerID, 10, 32)
 		if move_string == "" {
 			move_err = fmt.Errorf("invalid move string %v", move_string)
 		}
-		if bot_id_err == nil && player_id_err == nil && move_err == nil {
+		if botID_err == nil && playerID_err == nil && move_err == nil {
 			// next step
-			err := playMove(int(bot_id_int), int(player_id_int), move_string, &db)
+			err := playMove(int(botID_int), int(playerID_int), move_string, &db)
 			if err != nil {
 				c.String(400, "%v", err)
 			}
 		}
-		if bot_id_err != nil {
-			c.String(400, "invalid bot id type: %v", bot_id_err)
+		if botID_err != nil {
+			c.String(400, "invalid bot id type: %v", botID_err)
 		}
-		if player_id_err != nil {
-			c.String(400, "invalid player id type: %v", player_id_err)
+		if playerID_err != nil {
+			c.String(400, "invalid player id type: %v", playerID_err)
 		}
 		if move_err != nil {
 			c.String(400, "invalid move: %v", move_err)
@@ -174,14 +174,14 @@ func main() {
 	})
 
 	server.GET("/current_board_history", func(c *gin.Context) {
-		bot_id := c.Query("bot_id")
-		res, err := strconv.ParseInt(bot_id, 10, 32)
+		botID := c.Query("botID")
+		res, err := strconv.ParseInt(botID, 10, 32)
 		if err == nil {
-			board_state, err := currentBoardHistory(int(res), &db)
+			boardState, err := currentBoardHistory(int(res), &db)
 			if err != nil {
 				c.String(400, "%v", err)
 			} else {
-				c.String(200, board_state)
+				c.String(200, boardState)
 			}
 		} else {
 			c.String(400, "invalid bot id: %v", err)
@@ -189,8 +189,8 @@ func main() {
 	})
 
 	server.GET("/end_game", func(c *gin.Context) {
-		bot_id := c.Query("bot_id")
-		res, err := strconv.ParseInt(bot_id, 10, 32)
+		botID := c.Query("botID")
+		res, err := strconv.ParseInt(botID, 10, 32)
 		if err == nil {
 			err = endGame(int(res), &db)
 			if err != nil {
